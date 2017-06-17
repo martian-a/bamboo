@@ -1,0 +1,87 @@
+---------------------
+-- Email Addresses --
+---------------------
+
+contacts = {
+
+  -- Family
+  family = {
+  	name = "Family"
+  	consolidate = {
+  		--[[
+  			The email acccount that matching
+  			messages should be moved to.
+  		]]--
+    	destination = personal,
+    	--[[
+    		Whether to flag these messages
+    		(true) or not (false).
+    		Defaults to false.
+    	]]--
+    	star = false
+    },
+    clean = {
+    	--[[
+    		The number of days that messages 
+    		should be ignored before cleaning
+    		them.
+    		Defaults to 1.
+    	]]--
+    	days = 7,
+    	--[[ 
+    		Whether to clean messages that 
+    		have been starred (true) 
+    		or ignore them (false).
+    		Defaults to false.
+    	]]--
+    	starred = false,
+    	--[[
+    		The folder that messages should 
+    		be moved to
+    	--]]
+    	folder = "Family"
+    },
+    addresses = {
+    	"mum@gmail.com",
+    	"dad@yahoo.com",
+    	"mysister.co.uk",
+    	"brother@hotmail.co.uk"
+  	}
+  },
+  
+  -- Friends 
+  friends = {
+  	name = "Friends",
+  	consolidate = {
+  		destination = personal
+  	},
+  	clean = {
+      days = 7,
+      starred = false,
+      folder = "Friends",
+      modes = {"direct", "indirect"}
+  	},
+  	addresses = {
+    	"alice@gmail.com",
+    	"bob@yahoo.com"
+    }
+  },
+  
+  -- Miscellaneous High Priority
+  priority = {
+    name = "Miscellaneous High Priority",
+  	consolidate = {
+  		destination = catchall,
+  		star = true
+  	},
+  	clean = {
+  	  days = 30,
+      starred = false,
+      folder = "365 days"
+  	},
+  	addresses = {
+    	"lottery.com"
+    }
+  }
+  
+}

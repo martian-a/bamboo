@@ -1,0 +1,23 @@
+--------------------
+-- Email Accounts --
+--------------------
+
+accounts = {
+
+  {
+    name = "Catchall",
+    server = "imap.myhost.com",
+    username = "webmaster@mydomain.com",
+    ssl = "tls1",
+    password = "123456"
+  },
+  
+  {
+    name = "Personal",
+    server = "imap.myhost.com",
+    username = "me@mydomain.com",
+    ssl = "tls1",
+    password = "123456"
+  }
+
+}
