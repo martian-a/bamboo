@@ -82,6 +82,37 @@ contacts = {
   	addresses = {
     	"lottery.com"
     }
-  }
+  },
   
+  -- Services
+  services = {
+    name = "Services",
+    consolidate = {
+      destination = catchall
+    },
+    subjects = {
+      {
+        --[[
+          Move likely receipts from suppliers
+          into 30 days folder.
+        ]]--
+        name = "Receipts",
+        folder = "30 days",
+        keywords = {"receipt"}
+      },
+      {
+        --[[
+          Flag likely notices from suppliers
+        ]]--
+        name = "Notices",
+        starred = true,
+        keywords = {
+          "remind",
+          "renew",
+          "invoice",
+          "password"
+		}
+	  }
+  	}
+  }
 }

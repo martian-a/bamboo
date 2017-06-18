@@ -8,6 +8,12 @@ options.subscript = true
 -- If a target folder doesn't exist, create it
 options.create = true
 
+-- Auto-subscribe to any new folder that's created
+options.subscribe = true
+
+-- Ignore certificate mismatches :(
+options.certificates = false
+
 -- Import functions
 require("functions")
 
@@ -50,4 +56,5 @@ require("address_book")
 -----------
 
 require("consolidate")
-require("clean")
+-- require("organise")
+-- require("clean")

@@ -1,35 +1,36 @@
---------------------------
--- Consolidate Messages --
---------------------------
+--------------
+-- Organise --
+--------------
 
 --[[
-  Move non-personal messages to catchall.
-  Flag messages from priority senders.
+  Move and/or flag messages by subject.
 ]]--
 
+print(" \n\n== Organising ==\n")
 
-print(" \n\n== Consolidating ==\n")
 
-function consolidate(account, group) 
+function organise(group)
 
   print("\n")
-  
+
   -- Validation
-  if (account == nil) then
-    print("! Error: account not specified.")
-    return
-  elseif (group == nil) then
+  if (group == nil) then
     print("! Error: group not specified.")
+    return
+  elseif (group.consolidate == nil or group.consolidate.destination ==  nil) then
+    print("! Error: account not specified.")
     return
   elseif (group.addresses == nil) then
     print("! Error: no addresses specified.")
     return
-  elseif (group.consolidate == nil or group.consolidate.destination == nil) then
-    print("! Error: destination account not specified.")
+  elseif (group.subjects == nil) then
+    print("! Error: subjects not specified.")
     return
   end
   
-  print("Consolidating " .. group.name .. " in " .. account.name .. ".")
+  -- Get the account to be organised
+  local account = group.consolidate.destination
+  print("Organising " .. group.name .. " in " .. account.name .. ".")
   
   -- Select all messages in the inbox of the account to be organised
   local all_messages = account.INBOX:select_all()
@@ -38,22 +39,18 @@ function consolidate(account, group)
   -- Get email addresses of group
   local addresses = group.addresses
   print(#addresses .. " addresses to check.")
-    
   
   
   local function select_by_address(messages, address)
   
     print("- checking " .. address)
-    local matches = 
-          messages:contain_from(address)
-        + messages:contain_cc(address)
-        + messages:contain_bcc(address)
-        + messages:contain_to(address)
+    local matches = messages:contain_from(address)
     print("...found " .. #matches .. " messages.")
   
     return matches
-  end  
-    
+  end
+  
+ 
   
   --[[
     The rules to apply to any matches.
@@ -62,23 +59,38 @@ function consolidate(account, group)
   
     if (#messages > 0) then
     
-      if (group.consolidate.star == nil or group.consolidate.star == false) then
-        -- don't flag messages
-      elseif (not(group.consolidate.star == true)) then
-        print("! Error: the value of consolidate.star must be either true or false")
-      else
-        flag_messages(account, messages)
-      end
+      for _, subject in ipairs(group.subjects) do
         
-      -- Move messages related to family to my personal account
-      messages:move_messages(group.consolidate.destination["INBOX"])
+        local unmatched = messages
+        local all_matches = {}
+        for _, keyword in ipairs(subject.keywords) do
+          local matches = unmatched:contain_subject(keyword)
+          all_matches = all_matches + matches
+          unmatched = unmatched - matches
+        end
+        
+        if (#all_matches > 0) then
+          
+          if (not (subject.folder == nil)) then
+            all_matches:move(account[subject.folder])
+          end
+          
+          if (not (subject.starred == nil) and subject.starred == true) then
+            flag_messages(account, messages)
+          end
+        
+        else
+          print("0 " .. subject.name)
+        end
+        
+      end
+    
     else
-      print("0 messages to move.")
+      print("0 messages to organise.")
     end
   
   end
-  
-  
+
   --[[
     Select messages from email addresses in group
     and apply rules.
@@ -91,7 +103,7 @@ function consolidate(account, group)
       Apply rules after each address checked.
     ]]--
     
-    for index, address in ipairs(addresses) do
+    for _, address in ipairs(addresses) do
       local matches = select_by_address(unmatched, address)
       apply_rules(account, group, matches)
       
@@ -106,7 +118,7 @@ function consolidate(account, group)
       before applying rules.
     ]]--
     
-    for index, address in ipairs(addresses) do
+    for _, address in ipairs(addresses) do
       local matches = select_by_address(unmatched, address)
       all_matches = all_matches + matches
       unmatched = unmatched - matches
@@ -115,10 +127,7 @@ function consolidate(account, group)
     apply_rules(account, group, all_matches)
     
   end
- 
-end  
-
-consolidate(catchall, contacts.family)
-consolidate(catchall, contacts.friends)  
-consolidate(personal, contacts.priority)
-consolidate(personal, contacts.services)
+  
+  
+    
+end

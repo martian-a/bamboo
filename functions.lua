@@ -16,11 +16,26 @@ function init_account(data)
 end
 
 
-function to_from(messages, address)
-  local related = 
-      messages:contain_from(address)
-    + messages:contain_cc(address)
-    + messages:contain_bcc(address)
-    + messages:contain_to(address)
-  return related
+function flag_messages(account, messages, flag)
+
+  if (flag == nil) then
+    flag = "Flagged"
+  end
+
+  account:add_flags({flag}, messages)
+  account:mark_flagged()
+  print(#messages .. " flagged.")
+
+end
+
+
+function folder_exists(account, folder)
+  
+  local result = account:list_all('', folder)
+  
+  if (#result > 0) then
+    return true
+  end
+  
+  return false
 end
