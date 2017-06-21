@@ -38,14 +38,6 @@ mailboxes, folders = catchall:list_all()
 mailboxes, folders = catchall:list_subscribed()
 ]]--
 
----------------
--- Mailboxes --
----------------
-
--- Get the status of a mailbox
-for _, account in ipairs(accounts) do
-  account.INBOX:check_status()
-end
 
 ---------------------
 -- Email addresses --
@@ -65,4 +57,4 @@ require("organise")
 require("clean")
 require("junk")
 
-print("== Filtering complete ==")
+become_daemon(600, filter(accounts))

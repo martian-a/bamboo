@@ -2,6 +2,32 @@
 -- Functions --
 ---------------
 
+function filter(accounts)
+
+  announce("* Filtering starting *")
+  
+  status_report(accounts)
+  triage(accounts)
+  consolidate(accounts)
+  sweep(accounts)
+  organise(accounts)
+  clean(accounts)
+  junk(accounts)
+  announce("* Filtering complete *")
+
+end
+
+
+function status_report(accounts)
+
+  -- Get the status of a mailbox
+  for _, account in ipairs(accounts) do
+    account.INBOX:check_status()
+  end
+
+end
+
+
 function get_account(id)
 
   local account = nil
@@ -135,4 +161,11 @@ function size(table)
   end
   
   return count
+end
+
+
+function announce(message)
+
+  print("\n\n== " .. message .. " ==\n")
+  
 end
