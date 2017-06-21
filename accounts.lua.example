@@ -9,7 +9,13 @@ accounts = {
     server = "imap.myhost.com",
     username = "webmaster@mydomain.com",
     ssl = "tls1",
-    password = "123456"
+    password = "123456",
+    clean = {
+    	{
+    		group = "priority",
+    		mode = "direct"
+    	}
+    }
   },
   
   {
@@ -17,7 +23,31 @@ accounts = {
     server = "imap.myhost.com",
     username = "me@mydomain.com",
     ssl = "tls1",
-    password = "123456"
+    password = "654321",
+    clean = {
+      {
+        group = "family",
+        mode = "direct"
+      },
+      {
+        group = "friends",
+        mode = "direct"
+      },
+      {
+        group = "friends",
+        mode = "indirect"
+      },
+      {
+        group = "family",
+        mode = "indirect",
+        folder = "Saved/Friends"
+      }
+    },
+    sweep = {
+      destination = catchall
+    }
+  },
+    
   }
 
 }

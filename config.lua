@@ -25,8 +25,11 @@ require("functions")
 -- Load email accounts data (global: accounts)
 require("accounts")
 
-catchall = init_account(accounts[1])
-personal = init_account(accounts[2])
+catchall = create_account(accounts[1])
+personal = create_account(accounts[2])
+business = create_account(accounts[3])
+
+accounts = {personal, business, catchall}
 
 --[[ Get a list of the available mailboxes and folders
 mailboxes, folders = catchall:list_all()
@@ -40,9 +43,9 @@ mailboxes, folders = catchall:list_subscribed()
 ---------------
 
 -- Get the status of a mailbox
-catchall.INBOX:check_status()
-personal.INBOX:check_status()
-
+for _, account in ipairs(accounts) do
+  account.INBOX:check_status()
+end
 
 ---------------------
 -- Email addresses --
@@ -55,6 +58,11 @@ require("address_book")
 -- Rules --
 -----------
 
+require("triage")
 require("consolidate")
--- require("organise")
--- require("clean")
+require("sweep")
+require("organise")
+require("clean")
+require("junk")
+
+print("== Filtering complete ==")

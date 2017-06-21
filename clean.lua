@@ -41,6 +41,7 @@ function clean(address_group, mode, destination_folder)
   -- Get the group to be cleaned
   local group = contacts[address_group]
   print("Contact Group: " .. group.name)
+  print("Mode: " .. mode)
 
   -- Get the account to be organised
   local destination_account = group.consolidate.destination
@@ -91,7 +92,7 @@ function clean(address_group, mode, destination_folder)
   if (#old_messages > 0) then 
 
     -- Get the addresses for the current group
-    local addresses = group.addresses
+    local addresses = get_group_addresses(group)
     print(#addresses .. " addresses to check.")
     
     
@@ -158,53 +159,14 @@ function clean(address_group, mode, destination_folder)
 end -- clean() 
 
 
-clean("family", "direct")
-clean("friends", "direct")
-clean("friends", "indirect")
-clean("family", "indirect", "Saved/Friends")
-clean("priority", "default")
 
-
-
----------------------------
--- Junk --
----------------------------
-
-function junk(account)
-
-  -- Validate
-  if (account == nil) then
-    print("! Error: account not specified.")    
-  end
-
-  -- Select all messages remaining in the account inbox
-  local all_messages = account.INBOX:select_all()
+-- Clean the mail in each account, per instructions in account
+for _, account in ipairs(accounts) do
   
-  -- Select likely junk messages 
-  local junk = {}
-  if (folder_exists(account, "Junk")) then
-  
-    -- Select all messages that haven't been flagged
-    junk = all_messages - all_messages:is_flagged()
+  for _, job in ipairs(account.clean) do
     
-    -- Flag likely junk messages as such
-    flag_messages(account, junk, "Junk")
+    clean(job.group, job.mode, job.folder)
     
   end
-  
-  
-  -- Select all messages in the spam folder
-  local spam = {}
-  if (folder_exists(account, "Spam")) then
-    spam = account["Spam"]:select_all()
-  end
-  
-  -- Merge junk with spam
-  local suspicious = junk + spam
-  
-  -- Move all suspicious mail to the Junk folder
-  suspicious:move_messages(account["Junk"])
-  
+    
 end
-
-junk(catchall)

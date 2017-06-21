@@ -36,7 +36,7 @@ function consolidate(account, group)
   print(#all_messages .. " messages to check.")
   
   -- Get email addresses of group
-  local addresses = group.addresses
+  local addresses = get_group_addresses(group)
   print(#addresses .. " addresses to check.")
     
   
@@ -118,7 +118,23 @@ function consolidate(account, group)
  
 end  
 
-consolidate(catchall, contacts.family)
-consolidate(catchall, contacts.friends)  
-consolidate(personal, contacts.priority)
-consolidate(personal, contacts.services)
+
+--[[
+  Work out which groups require consolidation
+  and in which order and carry it out.
+]]--
+for order = 1, size(contacts) do
+  
+    for _, group in pairs(contacts) do
+         
+      if (group.consolidate.order == order and not(group.consolidate.skip)) then
+      
+        for _, source in ipairs(group.consolidate.check) do
+          consolidate(source, group)
+        end
+        
+      end
+    
+    end
+  
+end

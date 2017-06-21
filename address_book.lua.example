@@ -8,11 +8,18 @@ contacts = {
   family = {
   	name = "Family"
   	consolidate = {
+  		order = 1,
   		--[[
   			The email acccount that matching
   			messages should be moved to.
   		]]--
     	destination = personal,
+    	--[[
+    		Accounts to search while consolidating
+    	]]--
+    	check = {
+    		catchall
+    	}
     	--[[
     		Whether to flag these messages
     		(true) or not (false).
@@ -53,13 +60,16 @@ contacts = {
   friends = {
   	name = "Friends",
   	consolidate = {
-  		destination = personal
+  		order = 2,
+  		destination = personal,
+  		check = {
+  			catchall
+  		}
   	},
   	clean = {
       days = 7,
       starred = false,
-      folder = "Friends",
-      modes = {"direct", "indirect"}
+      folder = "Friends"
   	},
   	addresses = {
     	"alice@gmail.com",
@@ -71,8 +81,12 @@ contacts = {
   priority = {
     name = "Miscellaneous High Priority",
   	consolidate = {
+  		order = 3,
   		destination = catchall,
-  		star = true
+  		star = true,
+  		check = {
+  			personal
+  		}
   	},
   	clean = {
   	  days = 30,
@@ -88,9 +102,18 @@ contacts = {
   services = {
     name = "Services",
     consolidate = {
-      destination = catchall
+    	order = 4,
+      destination = catchall,
+      check = {
+      	personal
+      }
     },
-    subjects = {
+    clean = {
+    	days = 30,
+    	starred = false,
+    	folder = "365 days"
+    },
+    filters = {
       {
         --[[
           Move likely receipts from suppliers
@@ -113,6 +136,11 @@ contacts = {
           "password"
 		}
 	  }
+  	},
+  	addresses = {
+  		"amazon.co.uk",
+  		"amazon.com",
+  		"host.com"
   	}
   }
 }
