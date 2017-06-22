@@ -2,21 +2,6 @@
 -- Functions --
 ---------------
 
-function filter(accounts)
-
-  announce("* Filtering starting *")
-  
-  status_report(accounts)
-  triage(accounts)
-  consolidate(accounts)
-  sweep(accounts)
-  organise(accounts)
-  clean(accounts)
-  junk(accounts)
-  announce("* Filtering complete *")
-
-end
-
 
 function status_report(accounts)
 

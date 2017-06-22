@@ -14,47 +14,71 @@ options.subscribe = true
 -- Ignore certificate mismatches :(
 options.certificates = false
 
--- Import functions
-require("functions")
+
+----------------
+-- Controller --
+----------------
+
+function filter()
+
+  -- Import flobal functions
+  dofile("functions.lua")
+
+  announce("* Filtering starting *")
 
 
---------------
--- Accounts --
---------------
+  --------------
+  -- Accounts --
+  --------------
+  
+  -- Load email accounts data (global: accounts)
+  dofile("accounts.lua")
+  
+  catchall = create_account(accounts[1])
+  personal = create_account(accounts[2])
+  business = create_account(accounts[3])
+  
+  accounts = {personal, business, catchall}
 
--- Load email accounts data (global: accounts)
-require("accounts")
-
-catchall = create_account(accounts[1])
-personal = create_account(accounts[2])
-business = create_account(accounts[3])
-
-accounts = {personal, business, catchall}
-
---[[ Get a list of the available mailboxes and folders
-mailboxes, folders = catchall:list_all()
-
--- Get a list of the subscribed mailboxes and folders
-mailboxes, folders = catchall:list_subscribed()
-]]--
+  
+  ---------------------
+  -- Email addresses --
+  ---------------------
+  
+  -- Load email address lists (global: contacts)
+  dofile("address_book.lua")
 
 
----------------------
--- Email addresses --
----------------------
+  --------------
+  -- Rules --
+  --------------
 
--- Load email address lists (global: contacts)
-require("address_book")
+  dofile("triage.lua")
+  dofile("consolidate.lua")
+  dofile("sweep.lua")
+  dofile("organise.lua")
+  dofile("clean.lua")
+  dofile("junk.lua")
 
------------
--- Rules --
------------
+  
+  --------------
+  -- Sequence --
+  --------------
+  
+  status_report(accounts)
+  triage(accounts)
+  consolidate(accounts)
+  sweep(accounts)
+  organise(accounts)
+  clean(accounts)
+  junk(accounts)
+  announce("* Filtering complete *")
 
-require("triage")
-require("consolidate")
-require("sweep")
-require("organise")
-require("clean")
-require("junk")
+end
 
-become_daemon(600, filter(accounts))
+
+---------------
+-- Daemonize --
+---------------
+
+become_daemon(600, filter(), true, true)
