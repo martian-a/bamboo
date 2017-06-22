@@ -54,7 +54,6 @@ function flag_messages(account, messages, flag)
 
   messages:add_flags({flag})
   messages:mark_flagged()
-  print(#messages .. " flagged.")
 
 end
 

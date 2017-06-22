@@ -25,7 +25,7 @@ function triage(account)
 
     -- Select all messages in the inbox of the account to be organised
     local messages = account.INBOX:select_all()
-    print(#messages .. " messages")
+    print(#messages .. " message(s)")
 
     local chunk_size = 500
     local moved = 0
@@ -49,7 +49,7 @@ function triage(account)
   local function restore(account, temp_folder, space_available)
 
     local held_messages = account[temp_folder]:select_all()
-    print("There are currently " .. #held_messages .. " messages in stasis.")
+    print("There are currently " .. #held_messages .. " message(s) in stasis.")
 
     if (space_available < 1) then
       print("Insufficient space in Inbox to restore messages.")

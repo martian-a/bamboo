@@ -68,7 +68,7 @@ function clean(account)
     if (not group.clean.starred) then  
       -- Ignore old messages that are starred
       old_messages = old_messages - old_messages:is_flagged() 
-      print("...ignoring messages that are flagged.\n" .. #old_messages .. " messages to check.")
+      print("...ignoring messages that are flagged.\n" .. #old_messages .. " message(s) to check.")
     end    
   
   
@@ -92,7 +92,7 @@ function clean(account)
   
       -- Get the addresses for the current group
       local addresses = get_group_addresses(group)
-      print(#addresses .. " addresses to check.")
+      print(#addresses .. " address(es) to check.")
       
       
       local function select_by_address(messages, address, mode)
@@ -111,7 +111,7 @@ function clean(account)
         else
           matches = messages:contain_from(address)
         end    
-        print("...found " .. #matches .. " messages.")
+        print("...found " .. #matches .. " message(s).")
       
         return matches
       end

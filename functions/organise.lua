@@ -35,18 +35,18 @@ function organise(account)
   
     -- Select all messages in the inbox of the account to be organised
     local all_messages = account.INBOX:select_all()
-    print(#all_messages .. " messages to check.")
+    print(#all_messages .. " message(s) to check.")
   
     -- Get all filters for group
     local all_filters = group.filters
-    print(#all_filters .. " filters to apply.")
+    print(#all_filters .. " filter(s) to apply.")
   
   
     local function select_by_address(messages, address)
   
       print("- checking " .. address)
       local matches = messages:contain_from(address)
-      print("...found " .. #matches .. " messages.")
+      print("...found " .. #matches .. " message(s).")
   
       return matches
     end
@@ -126,7 +126,7 @@ function organise(account)
       else
         addresses = get_group_addresses(group)
       end
-      print(#addresses .. " addresses to check.")
+      print(#addresses .. " addresse(s) to check.")
   
   
       --[[
