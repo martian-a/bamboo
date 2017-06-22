@@ -2,8 +2,8 @@
 -- Options --
 -------------
 
+-- Time to wait (in seconds) for the mail server to respond.
 options.timeout = 120
-options.subscript = true
 
 -- If a target folder doesn't exist, create it
 options.create = true
@@ -11,59 +11,66 @@ options.create = true
 -- Auto-subscribe to any new folder that's created
 options.subscribe = true
 
+-- Don't delete all messages marked for deletion at the end of the session
+options.close = false
+
+-- Use a TLS connection (if server supports it) 
+options.starttls = true
+
 -- Ignore certificate mismatches :(
 options.certificates = false
 
 
-----------------
--- Controller --
-----------------
+----------------------
+-- Global Functions --
+----------------------
 
-function filter()
+-- Import flobal functions
+require("functions/functions.lua")
 
-  -- Import flobal functions
-  dofile("functions.lua")
 
+--------------
+-- Accounts --
+--------------
+  
+-- Load email accounts data (global: accounts)
+require("data/accounts.lua")
+
+catchall = create_account(accounts[1])
+personal = create_account(accounts[2])
+business = create_account(accounts[3])
+
+accounts = {personal, business, catchall}
+
+
+---------------------
+-- Email addresses --
+---------------------
+
+-- Load email address lists (global: contacts)
+require("data/address_book.lua")
+
+
+------------------
+-- Rule Modules --
+------------------
+
+require("functions/triage.lua")
+require("functions/consolidate.lua")
+require("functions/sweep.lua")
+require("functions/organise.lua")
+require("functions/clean.lua")
+require("functions/junk.lua")
+
+
+--------------
+-- Sequence --
+--------------
+
+function filter(accounts)
+
+ 
   announce("* Filtering starting *")
-
-
-  --------------
-  -- Accounts --
-  --------------
-  
-  -- Load email accounts data (global: accounts)
-  dofile("accounts.lua")
-  
-  catchall = create_account(accounts[1])
-  personal = create_account(accounts[2])
-  business = create_account(accounts[3])
-  
-  accounts = {personal, business, catchall}
-
-  
-  ---------------------
-  -- Email addresses --
-  ---------------------
-  
-  -- Load email address lists (global: contacts)
-  dofile("address_book.lua")
-
-
-  --------------
-  -- Rules --
-  --------------
-
-  dofile("triage.lua")
-  dofile("consolidate.lua")
-  dofile("sweep.lua")
-  dofile("organise.lua")
-  dofile("clean.lua")
-  dofile("junk.lua")
-
-  
-  --------------
-  -- Sequence --
-  --------------
   
   status_report(accounts)
   triage(accounts)
@@ -77,8 +84,12 @@ function filter()
 end
 
 
----------------
--- Daemonize --
----------------
+-------------
+-- Execute --
+-------------
 
-become_daemon(600, filter(), true, true)
+repeat
+
+  filter(accounts)
+  
+until not(catchall.INBOX:enter_idle())
