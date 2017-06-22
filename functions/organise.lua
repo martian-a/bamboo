@@ -5,7 +5,7 @@
 --[[
   Move and/or flag messages by subject.
   ]]--
-function organise(accounts)
+function organise(account)
 
   announce("Organising")
   
@@ -179,7 +179,7 @@ function organise(accounts)
   for i in pairs(contacts) do
   
     local group = contacts[i]
-    if (group.filters) then
+    if (group.filters and group.consolidate.destination == account) then
       
       organise_group(group)
       

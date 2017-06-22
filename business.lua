@@ -26,7 +26,7 @@ options.certificates = false
 ----------------------
 
 -- Import flobal functions
-require("functions/functions.lua")
+require("functions/functions")
 
 
 --------------
@@ -34,7 +34,7 @@ require("functions/functions.lua")
 --------------
   
 -- Load email accounts data (global: accounts)
-require("data/accounts.lua")
+require("data/accounts")
 
 catchall = create_account(accounts[1])
 personal = create_account(accounts[2])
@@ -48,37 +48,37 @@ accounts = {personal, business, catchall}
 ---------------------
 
 -- Load email address lists (global: contacts)
-require("data/address_book.lua")
+require("data/address_book")
 
 
 ------------------
 -- Rule Modules --
 ------------------
 
-require("functions/triage.lua")
-require("functions/consolidate.lua")
-require("functions/sweep.lua")
-require("functions/organise.lua")
-require("functions/clean.lua")
-require("functions/junk.lua")
+require("functions/triage")
+require("functions/consolidate")
+require("functions/sweep")
+require("functions/organise")
+require("functions/clean")
+require("functions/junk")
 
 
 --------------
 -- Sequence --
 --------------
 
-function filter(accounts)
+function filter(accounts, account)
 
  
   announce("* Filtering starting *")
   
   status_report(accounts)
-  triage(accounts)
-  consolidate(accounts)
-  sweep(accounts)
-  organise(accounts)
-  clean(accounts)
-  junk(accounts)
+  triage(account)
+  consolidate(account)
+  sweep(account)
+  organise(account)
+  clean(account)
+  junk(account)
   announce("* Filtering complete *")
 
 end
@@ -90,6 +90,6 @@ end
 
 repeat
 
-  filter(accounts)
+  filter(accounts, business)
   
-until not(catchall.INBOX:enter_idle())
+until not(business.INBOX:enter_idle())

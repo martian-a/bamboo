@@ -2,12 +2,12 @@
 -- Junk --
 ---------------------------
 
-function junk(accounts)
+--[[
+  Identify likely junk mail in each account and move to junk folder.  
+]]--
+function junk(account)
 
   announce("Junk Mail")
-
-  function clear_junk(account)
-  
   
     -- Validate
     if (account == nil) then
@@ -38,15 +38,5 @@ function junk(accounts)
   
     -- Move all suspicious mail to the Junk folder
     suspicious:move_messages(account["Junk"])
-  
-  end
-  
-  
-  -- Identify likely junk mail in each account and move to junk folder.
-  for _, account in ipairs(accounts) do
-  
-    clear_junk(account)
-  
-  end
 
 end

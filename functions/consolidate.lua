@@ -6,7 +6,7 @@
   Move non-personal messages to catchall.
   Flag messages from priority senders.
 ]]--
-function consolidate(accounts)
+function consolidate(account)
 
   announce("Consolidating")
 
@@ -130,7 +130,11 @@ function consolidate(accounts)
         if (group.consolidate.order == order and not(group.consolidate.skip)) then
         
           for _, source in ipairs(group.consolidate.check) do
-            consolidate_group(source, group)
+            
+            if (source == account) then
+              consolidate_group(source, group)
+            end
+            
           end
           
         end

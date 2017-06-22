@@ -6,7 +6,7 @@
   Archive older messages and move likely 
   junk mail into the junk folder.
 ]]--
-function clean(accounts)
+function clean(account)
 
   announce("Cleaning")
   
@@ -160,14 +160,10 @@ function clean(accounts)
   
   
   -- Clean the mail in each account, per instructions in account
-  for _, account in ipairs(accounts) do
+  for _, job in ipairs(account.clean) do
     
-    for _, job in ipairs(account.clean) do
-      
-      clean_group(job.group, job.mode, job.folder)
-      
-    end
-      
+    clean_group(job.group, job.mode, job.folder)
+    
   end
-
+      
 end

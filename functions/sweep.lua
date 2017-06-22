@@ -2,7 +2,7 @@
 -- Sweep --
 -----------
 
-function sweep(accounts) 
+function sweep(account) 
 
   announce("Sweep")
 
@@ -38,13 +38,9 @@ function sweep(accounts)
 
 
   -- Sweep-up any unexpected mail, as per instructions in accounts
-  for _, account in pairs(accounts) do
-    
-    local destination_account = get_account(account.sweep.destination)
-    if (destination_account ~= nil) then
-      sweep_account(account, destination_account)
-    end
-    
-  end 
+  local destination_account = get_account(account.sweep.destination)
+  if (destination_account ~= nil) then
+    sweep_account(account, destination_account)
+  end
   
 end
