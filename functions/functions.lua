@@ -137,6 +137,31 @@ function get_group_addresses(group)
 end
 
 
+function get_keywords(keyword_in, all_keywords)
+    
+  if (all_keywords == nil) then
+    all_keywords = {}
+  end
+  
+  for _, keyword in ipairs(keyword_in) do
+  
+    if (type(keyword) == "table") then
+      get_keywords(keyword, all_keywords)
+    else
+      
+      if (not(contains(all_keywords, keyword))) then
+        table.insert(all_keywords, keyword)
+      end
+      
+    end
+  
+  end
+  
+  return all_keywords
+
+end
+
+
 function size(table)
 
   local count = 0

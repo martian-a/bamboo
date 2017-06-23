@@ -62,9 +62,8 @@ function organise(account)
   
         local all_matches = {}
         if (filter.keywords) then
-  
           local unmatched = messages
-          for _, keyword in ipairs(filter.keywords) do
+          for _, keyword in ipairs(get_keywords(filter.keywords)) do
   
             local matches = unmatched:contain_subject(keyword)
             all_matches = all_matches + matches
