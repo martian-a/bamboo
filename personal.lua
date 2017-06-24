@@ -20,6 +20,9 @@ options.starttls = true
 -- Ignore certificate mismatches :(
 options.certificates = false
 
+-- Time to wait (in mins) before terminating and re-issuing the IDLE command
+options.keepalive = 5
+
 
 ----------------------
 -- Global Functions --
@@ -57,8 +60,8 @@ require("data/address_book")
 
 require("functions/triage")
 require("functions/consolidate")
-require("functions/sweep")
 require("functions/organise")
+require("functions/sweep")
 require("functions/clean")
 require("functions/junk")
 
@@ -75,8 +78,8 @@ function filter(accounts, account)
   status_report(accounts)
   triage(account)
   consolidate(account)
-  sweep(account)
   organise(account)
+  sweep(account)
   clean(account)
   junk(account)
   announce("* Filtering complete *")
