@@ -21,7 +21,7 @@ function consolidate(account)
     elseif (group == nil) then
       print("! Error: group not specified.")
       return
-    elseif (group.addresses == nil) then
+    elseif (group.from == nil and group.to == nil) then
       print("! Error: no addresses specified.")
       return
     elseif (group.consolidate == nil or group.consolidate.destination == nil) then
@@ -36,7 +36,7 @@ function consolidate(account)
     print(#all_messages .. " messages to check.")
     
     -- Get email addresses of group
-    local addresses = get_group_addresses(group)
+    local addresses = merge(get_group_addresses(group))
     print(#addresses .. " addresses to check.")
       
     
@@ -49,6 +49,7 @@ function consolidate(account)
           + messages:contain_cc(address)
           + messages:contain_bcc(address)
           + messages:contain_to(address)
+          + messages:contain_field("Reply-To", address)  
       print("...found " .. #matches .. " messages.")
     
       return matches
@@ -123,14 +124,14 @@ function consolidate(account)
     Work out which groups require consolidation
     and in which order and carry it out.
   ]]--
-  for order = 1, size(contacts) do
+  for order = 1, size(address_book.contacts) do
     
-      for _, group in pairs(contacts) do
+      for _, group in pairs(address_book.contacts) do   
            
         if (group.consolidate.order == order and not(group.consolidate.skip)) then
         
-          for _, source in ipairs(group.consolidate.check) do
-            
+          for _, source in ipairs(group.consolidate.check) do          
+                        
             if (source == account) then
               consolidate_group(source, group)
             end

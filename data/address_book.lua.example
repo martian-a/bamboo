@@ -2,7 +2,38 @@
 -- Email Addresses --
 ---------------------
 
-contacts = {
+address_book = {}
+
+
+address_book.keywords = {
+  receipts = {
+    "receipt",
+    "order reference",
+    "order number"
+  },
+  notices = {
+    "bill",
+    "collect", -- collection, collected
+    "confirm",
+    "deliver", -- delivered, delivery
+    "despatch", "dispatch",
+    "expir", -- expire, expiry
+    "invit", -- invite, invitation
+    "invoice",
+    "payment",
+    "password",
+    "register",
+    "registration",
+    "remind",
+    "renew", -- renewed, renewal
+    "requir", -- require, required, requiring
+    "ship", -- shipped, shipping
+    "ticket",
+  }
+}
+
+
+address_book.contacts = {
 
   -- Family
   family = {
@@ -48,7 +79,7 @@ contacts = {
     	--]]
     	folder = "Family"
     },
-    addresses = {
+    from = {
     	"mum@gmail.com",
     	"dad@yahoo.com",
     	"mysister.co.uk",
@@ -71,7 +102,7 @@ contacts = {
       starred = false,
       folder = "Friends"
   	},
-  	addresses = {
+  	from = {
     	"alice@gmail.com",
     	"bob@yahoo.com"
     }
@@ -93,8 +124,11 @@ contacts = {
       starred = false,
       folder = "365 days"
   	},
-  	addresses = {
+  	from = {
     	"lottery.com"
+    },
+    to = {
+    	"finance@mydomain.com"
     }
   },
   
@@ -121,26 +155,25 @@ contacts = {
         ]]--
         name = "Receipts",
         folder = "30 days",
-        keywords = {"receipt"}
+        keywords = address_book.keywords.receipts
       },
       {
         --[[
           Flag likely notices from suppliers
         ]]--
         name = "Notices",
-        starred = true,
-        keywords = {
-          "remind",
-          "renew",
-          "invoice",
-          "password"
-		}
-	  }
+          star = true,
+          keywords = address_book.keywords.notices
+        },       
+	  	}
   	},
-  	addresses = {
+  	from = {
   		"amazon.co.uk",
   		"amazon.com",
   		"host.com"
+  	},
+  	to = {
+  		"shopping@mydomain.com"
   	}
   }
 }

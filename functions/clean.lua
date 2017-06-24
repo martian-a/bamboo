@@ -20,25 +20,25 @@ function clean(account)
     elseif (mode == nil) then
       print("! Error: mode not specified.")
       return
-    elseif (contacts[address_group] == nil) then
+    elseif (address_book.contacts[address_group] == nil) then
       print("! Error: invalid address_group.")
       return    
-    elseif (contacts[address_group].consolidate == nil or contacts[address_group].consolidate.destination == nil) then
+    elseif (address_book.contacts[address_group].consolidate == nil or address_book.contacts[address_group].consolidate.destination == nil) then
       print("! Error: account not specified.")
       return    
-    elseif (contacts[address_group].clean == nil) then
+    elseif (address_book.contacts[address_group].clean == nil) then
       print("! Error: clean rules not specified.")
       return
-    elseif (contacts[address_group].clean.folder == nil and destination_folder == nil) then
+    elseif (address_book.contacts[address_group].clean.folder == nil and destination_folder == nil) then
       print("! Error: destination folder not specified.")
       return
-    elseif (contacts[address_group].clean.folder == "INBOX" or destination_folder == "INBOX") then
+    elseif (address_book.contacts[address_group].clean.folder == "INBOX" or destination_folder == "INBOX") then
       print("! Error: destination folder is same as folder to be cleaned.")
       return
     end
     
     -- Get the group to be cleaned
-    local group = contacts[address_group]
+    local group = address_book.contacts[address_group]
     print("Contact Group: " .. group.name)
     print("Mode: " .. mode)
   
@@ -92,6 +92,7 @@ function clean(account)
   
       -- Get the addresses for the current group
       local addresses = get_group_addresses(group)
+      addresses = merge(addresses.from, addresses.to)
       print(#addresses .. " address(es) to check.")
       
       
@@ -109,7 +110,9 @@ function clean(account)
             + messages:contain_cc(address) 
             + messages:contain_bcc(address)            
         else
-          matches = messages:contain_from(address)
+          matches = 
+              messages:contain_from(address)
+            + messages:contain_field("Reply-To", address)  
         end    
         print("...found " .. #matches .. " message(s).")
       

@@ -21,7 +21,7 @@ function organise(account)
     elseif (group.consolidate == nil or group.consolidate.destination ==  nil) then
       print("! Error: account not specified.")
       return
-    elseif (group.addresses == nil) then
+    elseif (group.from == nil and group.to == nil) then
       print("! Error: no addresses specified.")
       return
     elseif (group.filters == nil) then
@@ -42,10 +42,25 @@ function organise(account)
     print(#all_filters .. " filter(s) to apply.")
   
   
-    local function select_by_address(messages, address)
+    local function select_by_address(messages, address, mode)
+  
+      if (mode == nil) then
+         mode = "from"
+      end
+      
+      if (mode ~= "from" and mode ~= "to") then
+        print("! Error: invalid value. The value of mode must be either \'from\' or \'to\'.")
+      end
   
       print("- checking " .. address)
-      local matches = messages:contain_from(address)
+      local matches = {}
+      if (mode == "to") then
+        matches = messages:contain_to(address)
+      else
+        matches = 
+          messages:contain_from(address) +
+          messages:contain_field("Reply-To", address)   
+      end
       print("...found " .. #matches .. " message(s).")
   
       return matches
@@ -112,6 +127,7 @@ function organise(account)
     -- Loop through filters
     for _, filter in ipairs(all_filters) do
   
+      print("\n")
       if (filter.name) then
         print("Applying filter: " .. filter.name)
       else
@@ -119,14 +135,13 @@ function organise(account)
       end
   
       -- Get email addresses to use with filter
-      local addresses = {}
-      if (filter.addresses ~= nil) then
-        addresses = filter.addresses
+      local all_addresses = {}
+      if (filter.from ~= nil or filter.to ~= nil) then
+        all_addresses = get_filter_addresses(filter)
       else
-        addresses = get_group_addresses(group)
+        all_addresses = get_group_addresses(group)
       end
-      print(#addresses .. " addresse(s) to check.")
-  
+      print((#all_addresses.from + #all_addresses.to) .. " addresse(s) to check:")        
   
       --[[
         Select messages from email addresses for filter
@@ -142,12 +157,17 @@ function organise(account)
           Apply rules after each address checked.
         ]]--
   
-        for _, address in ipairs(addresses) do
-          local matches = select_by_address(unmatched, address)
-          apply_rules(account, group, filter, matches)
-  
-          all_matches = all_matches + matches
-          unmatched = unmatched - matches
+        -- Apply the rules to each address in turn
+        for mode, addresses in pairs(all_addresses) do
+        
+          for _, address in ipairs(addresses) do
+            local matches = select_by_address(unmatched, address, mode)
+            apply_rules(account, group, filter, matches)
+    
+            all_matches = all_matches + matches
+            unmatched = unmatched - matches
+          end
+          
         end
   
       else
@@ -157,12 +177,20 @@ function organise(account)
           before applying rules.
         ]]--
   
-        for _, address in ipairs(addresses) do
-          local matches = select_by_address(unmatched, address)
-          all_matches = all_matches + matches
-          unmatched = unmatched - matches
+        -- Get all of the messages associated with all of the addresses
+        for mode, addresses in pairs(all_addresses) do
+        
+          print("mode: " .. mode)
+        
+          for _, address in ipairs(addresses) do
+            local matches = select_by_address(unmatched, address, mode)
+            all_matches = all_matches + matches
+            unmatched = unmatched - matches
+          end
+          
         end
-  
+        
+        -- Apply the rules to all the messages at once
         apply_rules(account, group, filter, all_matches)
   
       end
@@ -175,9 +203,10 @@ function organise(account)
   
   
   -- File and flag as per instructions in address book
-  for i in pairs(contacts) do
+  for i in pairs(address_book.contacts) do
   
-    local group = contacts[i]
+    local group = address_book.contacts[i]
+    
     if (group.filters and group.consolidate.destination == account) then
       
       organise_group(group)

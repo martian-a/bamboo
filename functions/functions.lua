@@ -87,20 +87,109 @@ function contains(table, value)
 end
 
 
-function get_group_addresses(group)
+function merge(tables_in, table_out)
 
-  local all_addresses = {}
+  if (table_out == nil) then
+    table_out = {}
+  end
+  
+  -- If tables_in is empty, return an empty table
+  if (tables_in == nil) then
+    return table_out
+  end
+  
+  for _, table_entry in pairs(tables_in) do
+  
+    if (type(table_entry) == "table") then
+      
+      merge(table_entry, table_out)
+      
+    elseif (table_entry == nil) then
+    
+    elseif (not(contains(table_out, table_entry))) then
+      
+      table.insert(table_out, table_entry)
+      
+    end
+    
+  end
+  
+  return table_out
+  
+end
 
+
+function get_filter_addresses(filter, from, to)
+
+  if (from == nil) then
+    from = true
+  end
+  
+  if (to == nil) then
+    to = true
+  end
+  
+  if (from ~= true and from ~= false) then
+    print("! Error: invalid value. The value of \'from\' must be either true or false.")
+  end
+  
+  if (to ~= true and to ~= false) then
+    print("! Error: invalid value. The value of \'to\' must be either true or false.")
+  end
+  
+  local filter_addresses = {
+    from = {},
+    to = {}
+  }
+  
+  if (from == true and filter.from) then
+    filter_addresses.from = merge(filter.from)
+  end
+  
+  if (to == true and filter.to) then
+    filter_addresses.to = merge(filter.to)
+  end
+  
+  return filter_addresses  
+
+end
+
+
+function get_group_addresses(group, from, to)
+
+  if (from == nil) then
+    from = true
+  end
+  
+  if (to == nil) then
+    to = true
+  end
+  
+  if (from ~= true and from ~= false) then
+    print("! Error: invalid value. The value of \'from\' must be either true or false.")
+  end
+  if (to ~= true and to ~= false) then
+    print("! Error: invalid value. The value of \'to\' must be either true or false.")
+  end
+  
+  local all_addresses = {
+    from = {},
+    to = {}
+  }
+  
   --[[
     Add the group's default list of addresses
     to the list being built.
   ]]--
-  if (group.addresses) then
-
-    all_addresses = group.addresses
-    
-  end  
-
+  if (from == true and group.from) then
+    all_addresses.from = group.from
+  end
+  
+  if (to == true and group.to) then
+    all_addresses.to = group.to  
+  end
+ 
+  
   --[[
     Add all email addresses that are listed
     in any of the group's filters.
@@ -114,50 +203,30 @@ function get_group_addresses(group)
       for addresses.
     ]]--
     for _, filter in ipairs(group.filters) do
-
-      if (filter.addresses) then
-        
-        -- Add any new addresses listed in the filter
-        for _, address in ipairs(filter.addresses) do
-
-          if (not(contains(all_addresses, address))) then
-            table.insert(all_addresses, address)
-          end
-
-        end
-        
+    
+      local filter_addresses = get_filter_addresses(filter, from, to)
+              
+      if (from == true and filter_addresses.from) then
+        all_addresses.from = merge(all_addresses.from, filter_addresses.from)
+      end
+      
+      if (to == true and filter_addresses.to) then
+        all_addresses.to = merge(all_addresses.to, filter_addresses.to)
       end
 
     end
 
   end
-
+  
   return all_addresses
 
 end
 
 
-function get_keywords(keyword_in, all_keywords)
-    
-  if (all_keywords == nil) then
-    all_keywords = {}
-  end
+function get_keywords(keywords_in)
   
-  for _, keyword in ipairs(keyword_in) do
-  
-    if (type(keyword) == "table") then
-      get_keywords(keyword, all_keywords)
-    else
-      
-      if (not(contains(all_keywords, keyword))) then
-        table.insert(all_keywords, keyword)
-      end
-      
-    end
-  
-  end
-  
-  return all_keywords
+  -- Flatten the list so that any reference keyword lists are merged in.   
+  return merge(keywords_in)
 
 end
 

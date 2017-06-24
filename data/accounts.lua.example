@@ -5,6 +5,7 @@
 accounts = {
 
   {
+    id = "ACC1",
     name = "Catchall",
     server = "imap.myhost.com",
     username = "webmaster@mydomain.com",
@@ -19,6 +20,7 @@ accounts = {
   },
   
   {
+  	id = "ACC2",
     name = "Personal",
     server = "imap.myhost.com",
     username = "me@mydomain.com",
