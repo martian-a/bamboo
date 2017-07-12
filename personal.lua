@@ -2,8 +2,8 @@
 -- Options --
 -------------
 
--- Time to wait (in seconds) for the mail server to respond.
-options.timeout = 120
+-- Provide feedback on actions applied by Imapfilter
+options.info = true
 
 -- If a target folder doesn't exist, create it
 options.create = true
@@ -20,8 +20,21 @@ options.starttls = true
 -- Ignore certificate mismatches :(
 options.certificates = false
 
--- Time to wait (in mins) before terminating and re-issuing the IDLE command
-options.keepalive = 5
+-- Return from IDLE on any change to Inbox
+options.wakeonany = true
+
+-- The time in minutes before terminating and re-issuing the IDLE command
+options.keepalive = 4
+
+-------------
+-- Logging --
+-------------
+
+-- Import log settings
+log = require("functions/log")
+
+-- Set the default log file name
+log.file.name = "personal.latest.log"
 
 
 ----------------------
@@ -44,15 +57,7 @@ personal = create_account(accounts[2])
 business = create_account(accounts[3])
 
 accounts = {personal, business, catchall}
-
-
----------------------
--- Email addresses --
----------------------
-
--- Load email address lists (global: contacts)
-require("data/address_book")
-
+primary_account = personal
 
 ------------------
 -- Rule Modules --
@@ -66,33 +71,12 @@ require("functions/clean")
 require("functions/junk")
 
 
---------------
--- Sequence --
---------------
-
-function filter(accounts, account)
-
- 
-  announce("* Filtering starting *")
-  
-  status_report(accounts)
-  triage(account)
-  consolidate(account)
-  organise(account)
-  sweep(account)
-  clean(account)
-  junk(account)
-  announce("* Filtering complete *")
-
-end
-
-
 -------------
 -- Execute --
 -------------
-
+    
 repeat
-
-  filter(accounts, personal)
-  
-until not(personal.INBOX:enter_idle())
+  dofile("functions/sequence.lua")
+  filter(accounts, primary_account)
+  log.file:close()
+until not(primary_account.INBOX:enter_idle())

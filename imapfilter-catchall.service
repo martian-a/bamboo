@@ -1,0 +1,17 @@
+[Unit]
+Description=Email Management (catchall)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/.imapfilter
+ExecStart=/bin/bash catchall.sh start
+ExecStop=/bin/bash catchall.sh stop
+RemainAfterExit=no
+Restart=always
+RestartSec=60
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

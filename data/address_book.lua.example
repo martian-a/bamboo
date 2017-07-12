@@ -2,15 +2,19 @@
 -- Email Addresses --
 ---------------------
 
+-- Properties relating to the address book
 address_book = {}
 
 
+-- Keyword lists that are used more than once
 address_book.keywords = {
+  
   receipts = {
     "receipt",
     "order reference",
     "order number"
   },
+  
   notices = {
     "bill",
     "collect", -- collection, collected
@@ -30,150 +34,188 @@ address_book.keywords = {
     "ship", -- shipped, shipping
     "ticket",
   }
+  
 }
 
 
+-- Email lists that are used more than once.
 address_book.contacts = {
+	
+	family = {
+		"mum@gmail.com",
+		"dad@yahoo.com",
+		"mysister.co.uk",
+		"brother@hotmail.co.uk"
+	}
+		
+}
 
-  -- Family
-  family = {
-  	name = "Family"
+address_book.groups = {
+
+  -- Family and friends
+  personal = {
+  	name = "Family and Friends"
   	consolidate = {
+  	
+  		-- This group's position in the queue of groups to be consolidated.
   		order = 1,
-  		--[[
-  			The email acccount that matching
-  			messages should be moved to.
-  		]]--
+
+  		-- The email acccount that sessages should be moved to during the consolidation step.
     	destination = personal,
-    	--[[
-    		Accounts to search while consolidating
-    	]]--
+
+    	-- Accounts to search while consolidating
     	check = {
     		catchall
     	}
-    	--[[
-    		Whether to flag these messages
-    		(true) or not (false).
-    		Defaults to false.
-    	]]--
-    	star = false
+
     },
-    clean = {
-    	--[[
-    		The number of days that messages 
-    		should be ignored before cleaning
-    		them.
-    		Defaults to 1.
-    	]]--
-    	days = 7,
-    	--[[ 
-    		Whether to clean messages that 
-    		have been starred (true) 
-    		or ignore them (false).
-    		Defaults to false.
-    	]]--
-    	starred = false,
-    	--[[
-    		The folder that messages should 
-    		be moved to
-    	--]]
-    	folder = "Family"
-    },
-    from = {
-    	"mum@gmail.com",
-    	"dad@yahoo.com",
-    	"mysister.co.uk",
-    	"brother@hotmail.co.uk"
-  	}
+    
+    filters = {
+    	
+    	{
+    		-- The name of this filter
+    		name = "From family",
+    		    	
+			-- Whether to flag these messages as important (true) or not (false).
+	    	-- Defaults to false.
+	    	star = true,
+	    	
+	    	-- The folder to move messages from family to.
+	    	folder = "Saved/Family",
+	    	
+	    	-- Apply this filter to messages that contain these strings in the from field.
+	    	from = {
+	    		address_book.contacts.family
+	    	}
+	    	
+    	},
+    	
+    	{
+    		-- The name of this filter
+    		name = "From friends",
+    		    	
+			-- Whether to flag these messages as important (true) or not (false).
+	    	-- Defaults to false.
+	    	star = true,
+	    	
+	    	-- The folder to move messages from family to.
+	    	folder = "Saved/Friends",
+	    	
+	    	-- Apply this filter to messages that contain these strings in the from field.
+		  	from = {
+		    	"alice@gmail.com",
+		    	"bob@yahoo.com"
+		    }
+			    	
+    	}
+    
+    }
+    
   },
   
-  -- Friends 
-  friends = {
-  	name = "Friends",
-  	consolidate = {
-  		order = 2,
-  		destination = personal,
-  		check = {
-  			catchall
-  		}
-  	},
-  	clean = {
-      days = 7,
-      starred = false,
-      folder = "Friends"
-  	},
-  	from = {
-    	"alice@gmail.com",
-    	"bob@yahoo.com"
-    }
-  },
+  
   
   -- Miscellaneous High Priority
   priority = {
     name = "Miscellaneous High Priority",
+  	
   	consolidate = {
   		order = 3,
   		destination = catchall,
-  		star = true,
   		check = {
-  			personal
+  			personal, 
+  			business
   		}
   	},
-  	clean = {
-  	  days = 30,
-      starred = false,
-      folder = "365 days"
-  	},
-  	from = {
-    	"lottery.com"
-    },
-    to = {
-    	"finance@mydomain.com"
-    }
+  	
+  	filters = {
+  		{
+  			star = true,
+  			folder = "365 days",
+  			from = {
+		    	"lottery.com"
+		    },
+		    to = {
+		    	"finance@mydomain.com"
+		    }
+		    
+		    
+		    clean = {
+		    
+		       	--[[
+		    		The number of days that messages 
+		    		should be ignored before cleaning
+		    		them.
+		    		Defaults to 1.
+		    	]]--
+		    	days = 30,
+		    	
+		    	--[[ 
+		    		Whether to clean messages that 
+		    		have been starred (true) 
+		    		or ignore them (false).
+		    		Defaults to false.
+		    	]]--
+		    	starred = false
+		    }
+  		}
+  	
+  	}
+  	
   },
   
   -- Services
   services = {
     name = "Services",
     consolidate = {
-    	order = 4,
+    	order = 2,
       destination = catchall,
       check = {
       	personal
       }
     },
-    clean = {
-    	days = 30,
-    	starred = false,
-    	folder = "365 days"
-    },
+    
     filters = {
-      {
-        --[[
-          Move likely receipts from suppliers
-          into 30 days folder.
-        ]]--
+    
+      --Likely receipts from suppliers.
+      {    
         name = "Receipts",
-        folder = "30 days",
-        keywords = address_book.keywords.receipts
+        star = true,
+        keywords = {
+          address_book.keywords.receipts
+        },        
+        clean = {
+          days = 1,
+          starred = false,
+          folder = "30 days"
+        }
       },
+      
+      -- Likely notices from suppliers
       {
-        --[[
-          Flag likely notices from suppliers
-        ]]--
         name = "Notices",
-          star = true,
-          keywords = address_book.keywords.notices
-        },       
-	  	}
+        star = true,
+        keywords = {
+          address_book.keywords.notices
+        },
+        clean = {
+          days = 1,
+          starred = false,
+          folder = "365 days"
+        }
+      }
   	},
+  	
+  	-- Email addresses for messages to apply these rules to
   	from = {
   		"amazon.co.uk",
   		"amazon.com",
   		"host.com"
   	},
+  	
   	to = {
   		"shopping@mydomain.com"
   	}
+  	
   }
 }

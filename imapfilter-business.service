@@ -1,0 +1,17 @@
+[Unit]
+Description=Email Management (business)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/.imapfilter
+ExecStart=/bin/bash business.sh start
+ExecStop=/bin/bash business.sh stop
+RemainAfterExit=no
+Restart=always
+RestartSec=60
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

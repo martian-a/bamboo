@@ -2,6 +2,15 @@
 -- Email Accounts --
 --------------------
 
+-- Properties of Email accounts
+--[[
+	Default custom settings:
+	- stasis.folder = "Stasis"
+	- stasis.threshold = 1000
+	- stasis.restore = 500
+	- junk.folder = "Junk"
+	- trash.folder = "Deleted"
+]]--
 accounts = {
 
   {
@@ -11,10 +20,9 @@ accounts = {
     username = "webmaster@mydomain.com",
     ssl = "tls1",
     password = "123456",
-    clean = {
-    	{
-    		group = "priority",
-    		mode = "direct"
+    custom_settings = {
+    	junk = {
+          folder = "Spam"
     	}
     }
   },
@@ -26,30 +34,18 @@ accounts = {
     username = "me@mydomain.com",
     ssl = "tls1",
     password = "654321",
-    clean = {
-      {
-        group = "family",
-        mode = "direct"
-      },
-      {
-        group = "friends",
-        mode = "direct"
-      },
-      {
-        group = "friends",
-        mode = "indirect"
-      },
-      {
-        group = "family",
-        mode = "indirect",
-        folder = "Saved/Friends"
-      }
-    },
-    sweep = {
-      destination = catchall
+    custom_settings = {
+	    sweep = {
+	      destination = catchall
+	    },
+		stasis = {
+		  threshold = 50,
+		  restore = 25
+		},
+        trash = {
+          folder = "Trash"
+        }
     }
-  },
-    
   }
 
 }

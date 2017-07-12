@@ -2,217 +2,152 @@
 -- Organise --
 --------------
 
---[[
-  Move and/or flag messages by subject.
-  ]]--
-function organise(account)
+--- Move and/or flag messages according to conditions defined in filters
+-- @param account An IMAP account object. The account to organise.
+-- @param working_set A set. The messages currently being processed.
+-- @return A set. All messages that remain in the account's inbox at the end of this step, excluding any that arrived after the step began.
+function organise(account, working_set)
 
   announce("Organising")
   
-  
-  local function organise_group(group)
-  
-    print("\n")
+
+  --- Find messages related to this group and move or flag as required.
+  -- @param group A table. The address book group that defines the rules to be applied to the working set.
+  -- @param working_set A set. The messages to apply the group's rules to.  
+  local function organise_group(group, working_set)
   
     -- Validation
     if (group == nil) then
-      print("! Error: group not specified.")
+      log.error("Group not specified.")
       return
     elseif (group.consolidate == nil or group.consolidate.destination ==  nil) then
-      print("! Error: account not specified.")
-      return
-    elseif (group.from == nil and group.to == nil) then
-      print("! Error: no addresses specified.")
+      log.error("Account not specified.")
       return
     elseif (group.filters == nil) then
-      print("! Error: filters not specified.")
+      log.error("Filters not specified.")
       return
     end
   
     -- Get the account to be organised
     local account = group.consolidate.destination
-    print("Organising " .. group.name .. " in " .. account.name .. ".")
+    
+    log.info("Organising " .. group.name .. " in " .. account.name .. ".")
   
-    -- Select all messages in the inbox of the account to be organised
-    local all_messages = account.INBOX:select_all()
-    print(#all_messages .. " message(s) to check.")
-  
-    -- Get all filters for group
+    -- Get all the filters defined in this group
     local all_filters = group.filters
-    print(#all_filters .. " filter(s) to apply.")
+    log.info(#all_filters .. " filter(s) to apply.")
+    
+    
+    --- Apply rules specified by a filter
+    -- @param account An IMAP account object.  The account the group is associated with.
+    -- @param group A table. The group that defines the rules to apply.
+    -- @param filter A table. A set of rules to apply.
+    -- @param messages A set. The messages to apply the rules to.
+    -- @return A set. All messages moved as a result of applying these rules.
+    local function apply_rules(account, group, filter, messages)
+    
+      if (messages == nil or #messages < 1) then
+        -- There are no messages to apply the rules to. Return an empty set.
+        return Set {}
+      end
   
   
-    local function select_by_address(messages, address, mode)
-  
-      if (mode == nil) then
-         mode = "from"
+      if (filter.star == true) then
+        -- The filter specifies that unread messages should be flagged         
+        
+        -- Flag unread matches   
+        local unread = messages:is_unseen()
+        log.info(#unread .. " messages haven't yet been read.")
+        flag_messages(unread)
+             
       end
       
-      if (mode ~= "from" and mode ~= "to") then
-        print("! Error: invalid value. The value of mode must be either \'from\' or \'to\'.")
-      end
+      -- Separate the messages into flagged (including the newly flagged) and unflagged
+      local flagged = messages:is_flagged()
+      local unflagged = messages - flagged   
+      log.info(#flagged .. " messages match the filter but are flagged and so will stay in the inbox.")
+      
+      
+      -- Create container to hold all messages moved as a result of this filter
+      local moved = Set {}
+      
+      if (filter.folder) then   
+        -- The filter specifies a folder that unflagged messages should be moved to
+                
+        log.info(#unflagged .. " unflagged messages match the filter and will be moved.")
   
-      print("- checking " .. address)
-      local matches = {}
-      if (mode == "to") then
-        matches = messages:contain_to(address)
+        -- Move the unflagged messages to the folder specified in address book
+        unflagged:move_messages(account[filter.folder])
+        
+        -- Record which messages were moved
+        moved = unflagged
+                
       else
-        matches = 
-          messages:contain_from(address) +
-          messages:contain_field("Reply-To", address)   
+        
+        log.info("There are no instructions to move the " .. #unflagged .. " matching, unflagged message(s).")
+                
       end
-      print("...found " .. #matches .. " message(s).")
-  
-      return matches
-    end
-  
-  
-  
-    --[[
-      The rules to apply to any matches.
-    ]]--
-    local function apply_rules(account, group, filter, messages)
-  
-      if (#messages > 0) then
-  
-        local all_matches = {}
-        if (filter.keywords) then
-          local unmatched = messages
-          for _, keyword in ipairs(get_keywords(filter.keywords)) do
-  
-            local matches = unmatched:contain_subject(keyword)
-            all_matches = all_matches + matches
-            unmatched = unmatched - matches
-  
-          end
-        else
-          all_matches = messages
-        end
-  
-  
-        if (#all_matches > 0) then
-  
-          -- Flag unread matches       
-          if (filter.star == true) then
-            
-            local unread = all_matches:is_unseen()
-            flag_messages(account, unread)
-                 
-          end
-          
-          
-          if (filter.folder) then
-  
-            -- Get all flagged messages (new and old)
-            local unflagged = all_matches - all_matches:is_flagged()
-            
-            -- Move them to the folder specified in address book
-            unflagged:move_messages(account[filter.folder])
-  
-          end
-  
-        else
-          print("No filter rules apply.")
-        end
-  
-  
-      else
-        print("0 messages to organise.")
-      end
+      
+      return moved
   
     end
-  
-  
-  
-    -- Loop through filters
+ 
+    
+    -- Loop through the group's filters, applying the filter actions to messages that meet the filter conditions
     for _, filter in ipairs(all_filters) do
   
-      print("\n")
-      if (filter.name) then
-        print("Applying filter: " .. filter.name)
-      else
-        print("Applying unnamed filter.")
-      end
-  
-      -- Get email addresses to use with filter
-      local all_addresses = {}
-      if (filter.from ~= nil or filter.to ~= nil) then
-        all_addresses = get_filter_addresses(filter)
-      else
-        all_addresses = get_group_addresses(group)
-      end
-      print((#all_addresses.from + #all_addresses.to) .. " addresse(s) to check:")        
-  
-      --[[
-        Select messages from email addresses for filter
-        and apply rules.
-  
-  	    Exclude flagged messages.
-      ]]--
-      local unmatched = all_messages - all_messages:is_flagged()
-      local all_matches = {}
-      if (#all_messages > 1000) then
-        --[[
-          More than 1000 messages to check.
-          Apply rules after each address checked.
-        ]]--
-  
-        -- Apply the rules to each address in turn
-        for mode, addresses in pairs(all_addresses) do
+      -- Select all messages in the inbox of the account to be organised
+      local flagged = working_set:is_flagged()
+      local unflagged = working_set - flagged
+      flagged = nil
         
-          for _, address in ipairs(addresses) do
-            local matches = select_by_address(unmatched, address, mode)
-            apply_rules(account, group, filter, matches)
-    
-            all_matches = all_matches + matches
-            unmatched = unmatched - matches
-          end
+      -- Check that there are unflagged messages to organise  
+      if (#unflagged > 0) then
+      
+        -- Check that there is an action to implement
+        if (filter.folder or filter.star) then
+        
+          -- Check that there are organisation-related requirements to meet
+          if (filter.keywords or (filter.to or filter.from or filter.cc)) then
+            
+            --[[
+              Select messages that match the filter address and keyword conditions.
+              Exclude flagged messages.
+            ]]--
+            local matches = apply_filter_conditions(group, filter, unflagged)  
+        
+            -- Apply the filter actions to all the messages at once
+            local moved = apply_rules(account, group, filter, matches)
+            working_set = working_set - moved
           
-        end
-  
-      else
-        --[[
-          Fewer than 1000 messages to check.
-          Collect together all messages from all addresses
-          before applying rules.
-        ]]--
-  
-        -- Get all of the messages associated with all of the addresses
-        for mode, addresses in pairs(all_addresses) do
-        
-          print("mode: " .. mode)
-        
-          for _, address in ipairs(addresses) do
-            local matches = select_by_address(unmatched, address, mode)
-            all_matches = all_matches + matches
-            unmatched = unmatched - matches
           end
-          
-        end
         
-        -- Apply the rules to all the messages at once
-        apply_rules(account, group, filter, all_matches)
-  
+        end        
+      
       end
   
     end
   
-  
+    return working_set
+    
   end
   
   
   
-  -- File and flag as per instructions in address book
-  for i in pairs(address_book.contacts) do
-  
-    local group = address_book.contacts[i]
-    
+  -- Loop through groups, applying filters to messages that meet the filter conditions
+  for _, group in pairs(address_book.groups) do
+      
     if (group.filters and group.consolidate.destination == account) then
+    -- The filters in this group apply to the current account
       
-      organise_group(group)
+      -- apply this group's filters to the working set and 
+      -- return all messages from the working set that remain in the Inbox
+      working_set = organise_group(group, working_set)
       
     end
   
   end
+  
+  return working_set
 
 end

@@ -1,0 +1,17 @@
+[Unit]
+Description=Email Management (personal)
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/.imapfilter
+ExecStart=/bin/bash personal.sh start
+ExecStop=/bin/bash personal.sh stop
+RemainAfterExit=no
+Restart=always
+RestartSec=60
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
